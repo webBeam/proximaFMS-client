@@ -1,0 +1,56 @@
+/* Carry the public site's editorial hierarchy through the role workspaces. */
+.shell .workspace{min-width:0}
+.shell main{padding-top:clamp(18px,3vw,34px)}
+.shell .workspace-heading,.shell .role-banner{
+  position:relative;isolation:isolate;overflow:hidden;
+  padding:clamp(19px,3.5vw,40px);margin-bottom:22px;
+  border:1px solid var(--hero-line);border-radius:17px;
+  background:linear-gradient(115deg,var(--hero),var(--paper) 90%);
+}
+.shell .role-banner.trade-banner{background:linear-gradient(115deg,var(--feature),var(--paper) 90%);border-color:var(--feature-line)}
+.workspace-heading .eyebrow,.role-banner .eyebrow{display:inline-block;padding:6px 9px;border-radius:5px;background:var(--side-accent);color:var(--side-accent-ink)}
+.shell :is(.workspace-heading,.role-banner,.hero) h1,.shell .section-heading h2,.listing-detail h2{font-family:Georgia,serif;font-weight:500;letter-spacing:-.05em}
+.workspace-heading .heading-mark{position:absolute;inset:auto -9px -12px auto;transform:rotate(-14deg);color:var(--ink-accent);opacity:.12;z-index:-1;pointer-events:none}
+.workspace-heading .heading-mark svg{width:clamp(80px,13vw,175px);height:auto;stroke-width:.85}
+.shell .page-heading p,.shell .role-banner p{line-height:1.55}
+.shell .section-heading h2{font-size:clamp(23px,3vw,33px)}
+.shell .hero{background:linear-gradient(130deg,var(--hero),var(--paper));grid-template-columns:1fr 1fr}
+.shell .hero .property-photo{object-position:54% center}
+.shell .hero-copy{padding:clamp(22px,4vw,44px)}
+.shell .hero h1{line-height:.98}
+.shell .next,.shell .record,.shell .property,.shell .stat{box-shadow:0 5px 19px #14223a0b}
+.shell .record{padding:16px;border-inline-start:3px solid var(--hero-line)}
+.shell .record .record-icon{background:var(--hero);border-radius:9px}
+.shell .record .badge{white-space:normal}
+.shell .record-actions .button{min-height:36px}
+.shell .next h3,.shell .property h3{font-family:Georgia,serif;font-weight:500;font-size:clamp(21px,2.4vw,29px)}
+.shell .next .stat-icon{background:var(--side-accent);color:var(--side-accent-ink)}
+.shell .portfolio-summary{background:var(--feature);border-color:var(--feature-line)}
+.shell .trade-card{border-top:3px solid var(--side-accent)}
+.shell .property-art{height:clamp(150px,18vw,230px);overflow:hidden}
+.shell .property-art .property-photo{transition:transform .35s}
+.shell .property:hover .property-photo{transform:scale(1.045)}
+.shell .property-art>span{top:12px;left:12px;background:var(--paper);border-radius:5px;padding:6px 9px}
+.shell .property-body{padding:15px 17px}
+.shell .property-body>strong{color:var(--ink-accent)}
+.directory-filters{align-items:end;flex-wrap:wrap;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+.directory-filters>label{display:grid;gap:4px;color:var(--muted);font-size:12px;font-weight:750;min-width:0}
+.directory-filters>label:first-child{flex:1 1 200px}
+.directory-filters .search{width:100%}
+.directory-filters input,.directory-filters select{height:40px;font-size:13px}
+.listing-detail{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;background:var(--paper);padding:14px;border:1px solid var(--line);border-radius:16px}
+.listing-detail>.link{grid-column:1/-1;justify-self:start;margin:0 0 3px}
+.listing-detail-photo{min-height:260px;overflow:hidden;border-radius:11px}
+.listing-detail-copy{padding:clamp(12px,2.5vw,28px)}
+.listing-detail h2{font-size:clamp(29px,4vw,48px);margin:7px 0}
+.listing-detail p{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;line-height:1.5}
+.listing-detail dl{display:grid;gap:8px;margin:16px 0;background:var(--hero);padding:12px;border-radius:9px}
+.listing-detail dt{font-size:12px;color:var(--muted)}
+.listing-detail dd{font-weight:800;margin:2px 0 0}
+.listing-detail .button{margin-top:13px}
+.shell [data-page="Rent & receipts"] .record,.shell [data-page="Rent ledger"] .record{border-inline-start-color:var(--side-accent);padding-block:22px}
+.shell:not(.customer-shell) .sidebar nav button.selected{box-shadow:inset 3px 0 var(--side-accent)}
+.shell.customer-shell .sidebar nav button.selected{box-shadow:inset 0 -2px var(--side-accent)}
+@media(max-width:680px){.listing-detail{grid-template-columns:1fr}.listing-detail-photo{min-height:0;height:205px}}
+@media(max-width:480px){.shell .hero{grid-template-columns:1fr}.directory-filters{align-items:stretch}.directory-filters>label:first-child{flex-basis:auto}}
+@media(prefers-reduced-motion:reduce){.shell .property-art .property-photo{transition:none}.shell .property:hover .property-photo{transform:none}}
