@@ -57,7 +57,11 @@ export const pageBlurb: Record<string,string> = {
   Reports:'Funnel, collection and verification health across the platform.',
 }
 
-export const photoFor = (kind:string) => './photos/' + (kind==='Apartment'?'6117859':kind==='Boarding unit'?'6416122':'35361402') + '.jpg'
+const listingPhotos: Record<string,string> = { 'PF-101':'loft', 'PF-102':'flat', 'PF-103':'villa', 'PF-104':'bright', 'PF-105':'modern', 'PF-106':'living', pool:'pool', kitchen:'kitchen', villa:'villa', garden:'35361402' }
+export const photoFor = (kind:string, id?:string) => './photos/' + ((id&&listingPhotos[id]) || listingPhotos[kind] || (kind==='Apartment'?'6117859':kind==='Boarding unit'?'6416122':'35361402')) + '.jpg'
 export const money = (amount:number) => 'LKR ' + new Intl.NumberFormat('en-LK').format(amount)
 export const moveInCost = (listing:Listing) => listing.rent * (listing.depositMonths + listing.advanceMonths)
 export const uid = (prefix:string) => prefix + '-' + Array.from(crypto.getRandomValues(new Uint8Array(3)), byte => byte.toString(16).padStart(2,'0')).join('').toUpperCase()
+
+export const geo: Record<string,[number,number]> = { Dehiwala:[27,74], 'Mount Lavinia':[24,86], Kotte:[63,56], Rajagiriya:[58,38], Nugegoda:[56,72], Battaramulla:[76,46] }
+export const geoFor = (location:string): [number,number] => geo[location] ?? [50,60]

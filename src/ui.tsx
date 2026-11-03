@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { BadgeCheck, Bookmark, Check, ClipboardList, KeyRound, Megaphone, PenLine, RefreshCw, Search, ShieldCheck, Wallet, Wrench } from 'lucide-react'
 import { photoFor } from './data'
 
-export function Photo({kind,eager=false}:{kind:string; eager?:boolean}) {
-  return <img className="photo" src={photoFor(kind)} alt={kind==='Apartment'?'Apartment building with balconies':kind==='Boarding unit'?'Residential building beside palms':'Modern tropical house'} loading={eager?'eager':'lazy'} decoding="async"/>
+export function Photo({kind,id,eager=false}:{kind:string; id?:string; eager?:boolean}) {
+  return <img className="photo" src={photoFor(kind,id)} alt={kind==='Apartment'?'Apartment building with balconies':kind==='Boarding unit'?'Residential building beside palms':'Modern tropical house'} loading={eager?'eager':'lazy'} decoding="async"/>
 }
 
 export function Badge({status}:{status:string}) {
@@ -29,11 +29,12 @@ export const journeySteps = [
   { title:'Repair', detail:'Report, quote, fix, pay', icon:Wrench },
   { title:'Renew or exit', detail:'Inspect, settle deposit', icon:RefreshCw },
 ]
-export function Journey({current,compact=false}:{current:number; compact?:boolean}) {
-  return <ol className={'journey'+(compact?' compact':'')} aria-label="Tenancy lifecycle">{journeySteps.map((step,index)=>{
+export function Journey({current,compact=false,selected,onSelect}:{current:number; compact?:boolean; selected?:number; onSelect?:(index:number)=>void}) {
+  return <ol className={'journey'+(compact?' compact':'')+(onSelect?' pick':'')} aria-label="Tenancy lifecycle">{journeySteps.map((step,index)=>{
     const Icon = step.icon
     const state = index<current?'done':index===current?'now':'next'
-    return <li key={step.title} className={state} aria-current={state==='now'?'step':undefined}><span className="j-dot">{state==='done'?<Check size={16}/>:<Icon size={16}/>}</span><b>{step.title}</b>{!compact&&<small>{step.detail}</small>}</li>
+    const inner = <><span className="j-dot">{state==='done'?<Check size={16}/>:<Icon size={16}/>}</span><b>{step.title}</b>{!compact&&<small>{step.detail}</small>}</>
+    return <li key={step.title} className={state+(selected===index?' sel':'')} aria-current={state==='now'?'step':undefined}>{onSelect?<button type="button" aria-pressed={selected===index} onClick={()=>onSelect(index)}>{inner}</button>:inner}</li>
   })}</ol>
 }
 
@@ -53,7 +54,7 @@ export function Sparkline({values}:{values:number[]}) {
 
 export function Donut({value,label}:{value:number; label:string}) {
   const radius = 44, circumference = 2*Math.PI*radius
-  return <figure className="donut"><svg viewBox="0 0 120 120" role="img" aria-label={label+' '+value+' percent'}><circle className="d-track" cx="60" cy="60" r={radius}/><circle className="d-val" cx="60" cy="60" r={radius} strokeDasharray={`${circumference*value/100} ${circumference}`} transform="rotate(-90 60 60)"/></svg><figcaption><strong>{value}%</strong><span>{label}</span></figcaption></figure>
+  return <figure className="donut"><svg viewBox="0 0 120 120" role="img" aria-label={label+' '+value+' percent'}><circle className="d-track" cx="60" cy="60" r={radius}/><circle className="d-val" cx="60" cy="60" r={radius} strokeDasharray={`${circumference*value/100} ${circumference}`} style={{['--len' as string]:`${circumference*value/100} ${circumference}`}} transform="rotate(-90 60 60)"/></svg><figcaption><strong>{value}%</strong><span>{label}</span></figcaption></figure>
 }
 
 export function Columns({data,format}:{data:{label:string; value:number}[]; format:(value:number)=>string}) {
@@ -71,8 +72,8 @@ export function TrustMeter({level}:{level:1|2|3}) {
   return <ol className="trust-meter" aria-label="Investor trust level">{levels.map(([code,title,detail],index)=><li key={code} className={index+1<level?'done':index+1===level?'now':''}><span>{index+1<=level?<ShieldCheck size={16}/>:<KeyRound size={16}/>}</span><div><b>{code} · {title}</b><small>{detail}</small></div></li>)}</ol>
 }
 
-export function Kpi({label,value,hint,tone,children}:{label:string; value:ReactNode; hint?:string; tone:'mint'|'lime'|'sun'|'coral'; children?:ReactNode}) {
-  return <article className={'kpi '+tone}><span>{label}</span><strong>{value}</strong>{children}{hint&&<small>{hint}</small>}</article>
+export function Kpi({label,value,count,format,hint,tone,children}:{label:string; value?:ReactNode; count?:number; format?:(n:number)=>string; hint?:string; tone:'mint'|'lime'|'sun'|'coral'; children?:ReactNode}) {
+  return <article className={'kpi '+tone}><span>{label}</span><strong>{count===undefined?value:<CountUp to={count} format={format}/>}</strong>{children}{hint&&<small>{hint}</small>}</article>
 }
 
 export type Command = { label:string; hint:string; run:()=>void }
@@ -94,4 +95,73 @@ export function CommandPalette({items,onClose}:{items:Command[]; onClose:()=>voi
       <ul>{shown.map((item,position)=><li key={item.label+item.hint}><button className={position===index?'active':''} onMouseEnter={()=>setIndex(position)} onClick={()=>run(item)}><b>{item.label}</b><small>{item.hint}</small></button></li>)}{!shown.length&&<li className="cmd-empty">Nothing matches “{text}”.</li>}</ul>
     </div>
   </div>
+}
+
+const reduced = () => typeof matchMedia==='function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+export function CountUp({to,format,duration=1200}:{to:number; format?:(n:number)=>string; duration?:number}) {
+  const [shown,setShown] = useState(reduced()?to:0)
+  const ref = useRef<HTMLSpanElement>(null)
+  useEffect(()=>{
+    if (reduced()) {setShown(to);return}
+    let frame = 0
+    const run = () => {
+      const start = performance.now()
+      const tick = (now:number) => {
+        const t = Math.min(1,(now-start)/duration)
+        setShown(Math.round(to*(1-Math.pow(1-t,3))))
+        if (t<1) frame = requestAnimationFrame(tick)
+      }
+      frame = requestAnimationFrame(tick)
+    }
+    const settle = window.setTimeout(()=>setShown(to),duration+1800)
+    if (!('IntersectionObserver' in window)||!ref.current) {run();return () => {window.clearTimeout(settle);cancelAnimationFrame(frame)}}
+    const io = new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){io.disconnect();run()}},{threshold:.4})
+    io.observe(ref.current)
+    return () => {io.disconnect();window.clearTimeout(settle);cancelAnimationFrame(frame)}
+  },[to,duration])
+  return <span ref={ref}>{format?format(shown):shown.toLocaleString('en-LK')}</span>
+}
+
+export function celebrate() {
+  if (reduced()) return
+  const layer = document.createElement('div')
+  layer.className = 'confetti'
+  const colors = ['#cdf56e','#0a8f5b','#ffd166','#ff8a6b','#7ad7f0','#ffffff']
+  for (let i=0;i<70;i++) {
+    const piece = document.createElement('i')
+    piece.style.left = Math.random()*100+'%'
+    piece.style.background = colors[i%colors.length]
+    piece.style.setProperty('--dx',(Math.random()*240-120)+'px')
+    piece.style.setProperty('--rot',(Math.random()*720-360)+'deg')
+    piece.style.animationDelay = Math.random()*0.25+'s'
+    piece.style.animationDuration = 1.3+Math.random()*0.9+'s'
+    layer.appendChild(piece)
+  }
+  ;(document.querySelector('dialog[open]') ?? document.body).appendChild(layer)
+  window.setTimeout(()=>layer.remove(),2600)
+}
+
+export function useReveal() {
+  useEffect(()=>{
+    const nodes = Array.from(document.querySelectorAll('.reveal'))
+    if (reduced()||!('IntersectionObserver' in window)) {nodes.forEach(n=>n.classList.add('in'));return}
+    const io = new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15,rootMargin:'0px 0px -40px 0px'})
+    nodes.forEach(n=>io.observe(n))
+    return () => io.disconnect()
+  },[])
+}
+
+export const tilt = {
+  onPointerMove(e:ReactPointerEvent<HTMLElement>) {
+    if (e.pointerType!=='mouse'||reduced()) return
+    const r = e.currentTarget.getBoundingClientRect()
+    const x = (e.clientX-r.left)/r.width-.5, y = (e.clientY-r.top)/r.height-.5
+    e.currentTarget.style.setProperty('--rx',(-y*7).toFixed(2)+'deg')
+    e.currentTarget.style.setProperty('--ry',(x*9).toFixed(2)+'deg')
+    e.currentTarget.style.setProperty('--gx',((x+.5)*100).toFixed(1)+'%')
+    e.currentTarget.style.setProperty('--gy',((y+.5)*100).toFixed(1)+'%')
+  },
+  onPointerLeave(e:ReactPointerEvent<HTMLElement>) {
+    e.currentTarget.style.setProperty('--rx','0deg');e.currentTarget.style.setProperty('--ry','0deg')
+  },
 }
