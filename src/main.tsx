@@ -1,7 +1,9 @@
 import { createRoot } from 'react-dom/client'
-import '@fontsource-variable/plus-jakarta-sans/wght.css'
+import '@fontsource-variable/dm-sans'
 import './styles.css'
 import './skin.css'
+import './editorial.css'
+import './workspace.css'
 import App from './App'
 
 createRoot(document.getElementById('root')!).render(<App/>)

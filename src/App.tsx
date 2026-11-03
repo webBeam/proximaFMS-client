@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Bell, Building2, Sparkles, Check, ClipboardList, FileText, Home, LayoutDashboard, Moon, Plus, RotateCcw, Search, ShieldCheck, Sun, TriangleAlert, Wallet, Wrench, X } from 'lucide-react'
+import { ArrowRight, Bell, Building2, Sparkles, Check, ClipboardList, FileText, Home, LayoutDashboard, Moon, Plus, RotateCcw, Search, ShieldCheck, Sun, TriangleAlert, Wallet, Wrench, X } from 'lucide-react'
 import { initial, navigation, pageBlurb, people } from './data'
 import type { Role, State } from './data'
 import type { Ctx, Modal } from './ctx'
@@ -11,12 +11,14 @@ import { celebrate, CommandPalette } from './ui'
 import { Tour, tourSteps } from './Tour'
 import type { Command } from './ui'
 
-const storageKey = 'proxima-fms-v2'
+const storageKey = 'proxima-fms-v4'
 const themeKey = 'proxima-theme'
 const roles = Object.keys(people) as Role[]
+const roleLabel: Record<Role,string> = { Tenant:'Tenant', Investor:'Investor / Owner', Craftsman:'Craftsman', Admin:'Admin' }
+const contextTitle: Record<Role,string> = { Tenant:'Coastal Atrium Suite', Investor:'Galle Fort Pavilions', Craftsman:'Master Guild Workspace', Admin:'Governance & Audit Desk' }
 const feed: Record<Role,[string,string,string][]> = {
   Tenant:[['November rent is due on 5 November','Today','Rent & receipts'],['Your application APP-204 was received','2h ago','Applications'],['Repair MNT-107 is open for quotes','Yesterday','Maintenance']],
-  Investor:[['New application for Cinnamon Court','2h ago','Applications'],['Tenant reported a leaking tap','5h ago','Maintenance'],['Rent of LKR 85,000 collected','Yesterday','Rent ledger']],
+  Investor:[['New application for Coastal Atrium Suite','2h ago','Applications'],['Tenant reported a leaking tap','5h ago','Maintenance'],['Rent of LKR 85,000 collected','Yesterday','Rent ledger']],
   Craftsman:[['New plumbing job near Rajagiriya','1h ago','Job marketplace'],['Your quote was viewed','3h ago','My work'],['Payout of LKR 18,500 released','Yesterday','Earnings']],
   Admin:[['2 verification cases waiting','Now','Verification'],['1 listing awaiting moderation','1h ago','Listing moderation'],['Dispute DSP-012 nears its SLA','Today','Disputes']],
 }
@@ -111,31 +113,35 @@ export default function App() {
   return <>
     {landing?<Landing listings={state.listings.filter(l=>l.status==='Published')} extras={themeToggle} enter={enter} startTour={()=>setTour(0)}/>:
     <div className="shell">
+      <header className="top">
+        <button className="logo" aria-label="ProximaFMS home" onClick={()=>{setLanding(true);window.scrollTo({top:0})}}><span className="mark">PF</span><span className="wm"><strong>ProximaFMS</strong><small>Estates &amp; Facilities</small></span></button>
+        <div className="seg" role="group" aria-label="Switch role">{roles.map(r=><button key={r} aria-pressed={role===r} onClick={()=>enter(r)}>{roleLabel[r]}</button>)}</div>
+        <div className="top-tools">
+            <button className="home-btn" onClick={()=>{setLanding(true);window.scrollTo({top:0})}}><Home size={15}/> Home</button>
+            <button className="tour-btn" onClick={()=>setTour(0)}><Sparkles size={15}/> Tour</button>
+            <button className="cmd-btn" onClick={()=>setCmd(true)}><Search size={15}/> Search <kbd>⌘K</kbd></button>
+            <span className="demo-pill"><i/> Demo</span>
+            {themeToggle}
+            <button className="icon-btn" aria-label="Notifications" aria-expanded={bell} onClick={()=>setBell(v=>!v)}><Bell size={18}/><i className="bell-dot"/></button>{bell&&<div className="bell-pop" role="dialog" aria-label="Notifications"><h3>Notifications</h3>{feed[role].map(([title,when],i)=><button key={i} onClick={()=>{setBell(false);navigate(feed[role][i][2])}}><b>{title}</b><small>{when}</small></button>)}</div>}
+            </div>
+        
+      </header>
+      <div className="frame">
       <aside className="side">
-        <button className="logo" onClick={()=>navigate('Overview')}><span><Home size={18}/></span>Proxima<b>FMS</b></button>
-        <nav aria-label={role+' workspace'}>{navigation[role].map(name=>{const Icon=navIcon(name);return <button key={name} aria-current={page===name?'page':undefined} onClick={()=>navigate(name)}><Icon size={18}/>{name}</button>})}</nav>
+        <div className="ctx"><div><span>Active context</span><em>{role} mode</em></div><h2>{contextTitle[role]}</h2></div>
+        <nav aria-label={role+' workspace'}>{navigation[role].map(name=>{const Icon=navIcon(name);return <button key={name} aria-current={page===name?'page':undefined} onClick={()=>navigate(name)}><Icon size={17}/>{name}</button>})}</nav>
         <div className="side-foot">
           <div className="me"><span className="avatar">{people[role].split(' ').map(n=>n[0]).join('')}</span><div><strong>{people[role]}</strong><small>{role}</small></div></div>
           <button className="reset" onClick={()=>ctx.confirm('Reset demo data','This restores the sample records in this browser.','Reset demo',()=>{setState(initial);setRole('Tenant');navigate('Overview');setNotice('Demo data restored.')})}><RotateCcw size={14}/> Reset demo data</button>
         </div>
       </aside>
       <div className="work">
-        <header className="top">
-          <button className="crumb" onClick={()=>{setLanding(true);window.scrollTo({top:0})}}><Home size={15}/> Home <span>/</span> <b>{page}</b></button>
-          <div className="top-tools">
-            <button className="tour-btn" onClick={()=>setTour(0)}><Sparkles size={15}/> Tour</button>
-            <button className="cmd-btn" onClick={()=>setCmd(true)}><Search size={15}/> Search <kbd>⌘K</kbd></button>
-            <span className="demo-pill"><i/> Demo</span>
-            {themeToggle}
-            <button className="icon-btn" aria-label="Notifications" aria-expanded={bell} onClick={()=>setBell(v=>!v)}><Bell size={18}/><i className="bell-dot"/></button>{bell&&<div className="bell-pop" role="dialog" aria-label="Notifications"><h3>Notifications</h3>{feed[role].map(([title,when],i)=><button key={i} onClick={()=>{setBell(false);navigate(feed[role][i][2])}}><b>{title}</b><small>{when}</small></button>)}</div>}
-            <label className="role-pick"><span>Role</span><select aria-label="Switch role" value={role} onChange={e=>enter(e.target.value as Role)}>{roles.map(r=><option key={r}>{r}</option>)}</select></label>
-          </div>
-        </header>
         <main key={role+page}>
           {page!=='Overview'&&<div className="page-head"><div><span className="eyebrow">{role} workspace</span><h1>{page}</h1><p>{pageBlurb[page]}</p></div>{headerAction}</div>}
           <Page c={ctx}/>
           <footer className="app-foot">ProximaFMS <span>Client walkthrough · Sample data</span></footer>
         </main>
+      </div>
       </div>
     </div>}
     <dialog ref={dialog} className={(modal?.wide?'wide ':'')+(modal?.bare?'bare':'')} aria-labelledby="dialog-title" onCancel={e=>{e.preventDefault();if(!busy)setModal(null)}} onClick={e=>{if(e.target===dialog.current&&!busy)setModal(null)}}>

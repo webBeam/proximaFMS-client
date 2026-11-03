@@ -4,7 +4,7 @@
   --mint:#dcf3e6;--mint-ink:#0b6b45;--sun:#fff0c2;--sun-ink:#7a5600;--coral:#ffe1d8;--coral-ink:#a53a1e;--lime-soft:#ecf9c8;--lime-ink:#4a6a00;
   --good-bg:#dcf3e6;--good-ink:#0b6b45;--bad-bg:#ffe1d8;--bad-ink:#a53a1e;--wait-bg:#fff0c2;--wait-ink:#7a5600;
   --shadow:0 1px 2px #0f1f190a,0 8px 28px #0f1f190d;--shadow-lg:0 20px 60px #0f1f1933;
-  --font:"Plus Jakarta Sans Variable",ui-sans-serif,system-ui,sans-serif;
+  --font:"DM Sans Variable",ui-sans-serif,system-ui,sans-serif;
   color-scheme:light;font-family:var(--font);color:var(--ink);background:var(--bg);font-synthesis:none;-webkit-font-smoothing:antialiased
 }
 :root[data-theme="dark"]{
