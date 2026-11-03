@@ -2,14 +2,16 @@ import type { ReactNode } from 'react'
 import type { Role, State } from './data'
 
 export type Field = { name:string; label:string; type?:string; options?:string[] }
-export type Modal = { title:string; detail:string; body?:ReactNode; wide?:boolean; submit?:string; fields?:Field[]; run?:(data:FormData)=>void|Promise<void> }
+export type Modal = { title:string; detail:string; body?:ReactNode; wide?:boolean; bare?:boolean; submit?:string; fields?:Field[]; run?:(data:FormData)=>void|Promise<void> }
 export type Ctx = {
   state:State; setState:(update:(state:State)=>State)=>void
   role:Role; page:string; seed:string
   navigate:(page:string)=>void
   open:(modal:Modal)=>void
+  close:()=>void
   confirm:(title:string,detail:string,submit:string,run:()=>void)=>void
   notify:(message:string)=>void
+  celebrate:()=>void
 }
 
 export const value = (form:FormData,key:string) => String(form.get(key) ?? '').trim()
